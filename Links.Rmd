@@ -1,0 +1,448 @@
+---
+title: "Data Cleaning SQL Script"
+output:
+  html_document:
+    toc: TRUE
+    toc_depth: 1
+    number_sections: false
+    toc_float: true
+    df_print: paged
+editor_options: 
+  markdown: 
+  wrap: 72
+---
+
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+To complete the Capstone Project of the Google Data Analytics
+Professional Certificate I did analysis on the Cyclistic bike-share
+company, using the data provided from Divvy Bikes
+(<https://divvy-tripdata.s3.amazonaws.com/index.html>). To begin my
+analysis I performed most of of my data exploration, cleaning, and
+processing using SQL in the MySQL database management system. Afterwards
+I performed my final analysis using R, and created my data
+visualizations in R. The SQL script begins begins below.
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+# Importing Data
+
+------------------------------------------------------------------------
+
+First a new database was created to work in; then tables were created
+for each month, and finally the Cyclistic data contained in the csv files were
+imported into these new tables.
+
+``` sql
+ Create table july_211 (
+   ride_id Text,
+   rideable_type Text,
+   time_trip_started Timestamp,   
+   time_trip_ended Timestamp,
+   bike_station_start Text,
+   start_station_id Text,
+   bike_station_end Text,
+   end_station_id Text,
+   start_lat Real,
+   start_lng Real,  
+   end_lat Real,
+   end_lng Real,
+   customer_type Text);
+Create table june_22 (
+   ride_id Text,
+   rideable_type Text,
+   time_trip_started Timestamp,   
+   time_trip_ended Timestamp,
+   bike_station_start Text,
+   start_station_id Text,
+   bike_station_end Text,
+   end_station_id Text,
+   start_lat Real,
+   start_lng Real,  
+   end_lat Real,
+   end_lng Real,
+   customer_type Text);
+ Create table may_22 (
+   ride_id Text,
+   rideable_type Text,
+   time_trip_started Timestamp,   
+   time_trip_ended Timestamp,
+   bike_station_start Text,
+   start_station_id Text,
+   bike_station_end Text,
+   end_station_id Text,
+   start_lat Real,
+   start_lng Real,  
+   end_lat Real,
+   end_lng Real,
+   customer_type Text);
+Create table april_22 (
+   ride_id Text,
+   rideable_type Text,
+   time_trip_started Timestamp,   
+   time_trip_ended Timestamp,
+   bike_station_start Text,
+   start_station_id Text,
+   bike_station_end Text,
+   end_station_id Text,
+   start_lat Real,
+   start_lng Real,  
+   end_lat Real,
+   end_lng Real,
+   customer_type Text);
+Create table march_22 (
+   ride_id Text,
+   rideable_type Text,
+   time_trip_started Timestamp,   
+   time_trip_ended Timestamp,
+   bike_station_start Text,
+   start_station_id Text,
+   bike_station_end Text,
+   end_station_id Text,
+   start_lat Real,
+   start_lng Real,  
+   end_lat Real,
+   end_lng Real,
+   customer_type Text);
+Create table feb_22 (
+   ride_id Text,
+   rideable_type Text,
+   time_trip_started Timestamp,   
+   time_trip_ended Timestamp,
+   bike_station_start Text,
+   start_station_id Text,
+   bike_station_end Text,
+   end_station_id Text,
+   start_lat Real,
+   start_lng Real,  
+   end_lat Real,
+   end_lng Real,
+   customer_type Text);
+Create table jan_22 (
+   ride_id Text,
+   rideable_type Text,
+   time_trip_started Timestamp,   
+   time_trip_ended Timestamp,
+   bike_station_start Text,
+   start_station_id Text,
+   bike_station_end Text,
+   end_station_id Text,
+   start_lat Real,
+   start_lng Real,  
+   end_lat Real,
+   end_lng Real,
+   customer_type Text);
+Create table dec_21 (   
+   ride_id Text,
+   rideable_type Text,
+   time_trip_started Timestamp,   
+   time_trip_ended Timestamp,
+   bike_station_start Text,
+   start_station_id Text,
+   bike_station_end Text,
+   end_station_id Text,
+   start_lat Real,
+   start_lng Real,  
+   end_lat Real,
+   end_lng Real,
+   customer_type Text);
+Create table nov_21 (
+   ride_id Text,
+   rideable_type Text,
+   time_trip_started Timestamp,   
+   time_trip_ended Timestamp,
+   bike_station_start Text,
+   start_station_id Text,
+   bike_station_end Text,
+   end_station_id Text,
+   start_lat Real,
+   start_lng Real,  
+   end_lat Real,
+   end_lng Real,
+   customer_type Text);
+Create table  oct_21 (
+   ride_id Text,
+   rideable_type Text,
+   time_trip_started Timestamp,   
+   time_trip_ended Timestamp,
+   bike_station_start Text,
+   start_station_id Text,
+   bike_station_end Text,
+   end_station_id Text,
+   start_lat Real,
+   start_lng Real,  
+   end_lat Real,
+   end_lng Real,
+   customer_type Text);
+Create table sept_21 (
+   ride_id Text,
+   rideable_type Text,
+   time_trip_started Timestamp,   
+   time_trip_ended Timestamp,
+   bike_station_start Text,
+   start_station_id Text,
+   bike_station_end Text,
+   end_station_id Text,
+   start_lat Real,
+   start_lng Real,  
+   end_lat Real,
+   end_lng Real,
+   customer_type Text);
+Create table  aug_21 (
+   ride_id Text,
+   rideable_type Text,
+   time_trip_started Timestamp,   
+   time_trip_ended Timestamp,
+   bike_station_start Text,
+   start_station_id Text,
+   bike_station_end Text,
+   end_station_id Text,
+   start_lat Real,
+   start_lng Real,  
+   end_lat Real,
+   end_lng Real,
+   customer_type Text);
+Create table july_21 (
+   ride_id Text,
+   rideable_type Text,
+   time_trip_started Timestamp,   
+   time_trip_ended Timestamp,
+   bike_station_start Text,
+   start_station_id Text,
+   bike_station_end Text,
+   end_station_id Text,
+   start_lat Real,
+   start_lng Real,  
+   end_lat Real,
+   end_lng Real,
+   customer_type Text);
+```
+
+Combined all the tables into one table representing the full year timespan between July 2021 to July 2022, and then
+inserted the year's worth of data into this new table.
+
+``` sql
+Create table full_year (
+   ride_id Text,
+   rideable_type Text,
+   time_trip_started Timestamp,   
+   time_trip_ended Timestamp,
+   bike_station_start Text,
+   start_station_id Text,
+   bike_station_end Text,
+   end_station_id Text,
+   start_lat Real,
+   start_lng Real,  
+   end_lat Real,
+   end_lng Real,
+   customer_type Text);
+   
+Insert Into full_year
+Select * from july_211
+Union All 
+Select * from aug_21
+Union All
+Select * from sept_21
+Union All
+Select * from oct_21
+Union All 
+Select * from nov_21
+Union All 
+Select * from dec_21
+Union All
+Select * from jan_22
+Union All
+Select * from feb_22
+Union All
+Select * from march_22
+Union All
+Select * from april_22
+Union All
+Select * from may_22
+Union All 
+Select * from june_22;  
+```
+
+# Inspecting Data
+
+------------------------------------------------------------------------
+
+Identifying irregularities, anomalies, and reporting errors.
+
+``` sql
+-- Inspecting data to find trips whose duration where less than or equal to one minute,and also trips whose duration were short and did not change  location.
+
+Select timestampdiff(minute, time_trip_started, time_trip_ended), time_trip_started, time_trip_ended 
+ from full_year
+ where (timestampdiff(minute, time_trip_started, time_trip_ended) <= 3 
+ and time_trip_started = time_trip_ended)
+ or timestampdiff(minute, time_trip_started, time_trip_ended)  <= 1
+ order by timestampdiff(minute, time_trip_started, time_trip_ended);
+
+-- Identfying trips where the bike used was classic and the bike station start or end was either NULL or missing.
+
+Select * from full_year 
+ where (rideable_type = 'classic_bike' or rideable_type = 'docked_bike')
+ and  (bike_station_start IS NULL 
+ or bike_station_end IS NULL
+ or bike_station_start = ''
+ or bike_station_end = '');
+
+-- Examined bike stations to find potential 
+
+Select distinct(bike_station_start)
+ from full_year;
+
+-- Further inspection of stations that potentialy need to be removed
+
+Select *
+ from full_year
+ where bike_station_start = '';
+Select *
+ from full_year
+ where start_station_id like '%DIVVY%'; 
+  
+-- Identifying trips whose duration was outside the norm
+
+Select avg(trip_duration_minutes), max(trip_duration_minutes), min(trip_duration_minutes)
+ from full_year;
+
+Select count(trip_duration_minutes), trip_duration_minutes
+ from full_year
+ group by (trip_duration_minutes);
+```
+
+*Moved data into R to further visualize the trips' duration and identify
+potential outliers*
+
+# Cleaning and Altering the Dataset
+
+------------------------------------------------------------------------
+
+Removing the trips identified above from the dataset that contained
+anomalies.
+
+``` sql
+delete from full_year
+ where (timestampdiff(minute, time_trip_started, time_trip_ended) <= 3 
+ and bike_station_start = bike_station_end)
+ or timestampdiff(minute, time_trip_started, time_trip_ended)  <= 1
+ order by timestampdiff(minute, time_trip_started, time_trip_ended);
+
+delete from full_year 
+ where (rideable_type = 'classic_bike' or rideable_type = 'docked_bike')
+ and  (bike_station_start IS NULL 
+ or bike_station_end IS NULL
+ or bike_station_start = ''
+ or bike_station_end = '');
+ 
+delete from full_year
+ where bike_station_start = '351'
+ or bike_station_start = 'DIVVY CASSETTE REPAIR MOBILE STATION'
+ or bike_station_start = 'WEST CHI-WATSON'
+ or bike_station_start = 'Base - 2132 W Hubbard Warehouse'
+ or bike_station_start = 'Base - 2132 W Hubbard'
+ or bike_station_start = 'Pawel Bialowas - Test- PBSC charging station'
+ or start_station_id like '%DIVVY%';
+```
+
+Adding new columns to the dataset for later analysis.
+
+------------------------------------------------------------------------
+
+``` sql
+-- Added column that displays the duration of the trips
+
+ALTER TABLE full_year
+ADD trip_duration_minutes BIGINT;
+Update full_year 
+set trip_duration_minutes = (timestampdiff(minute, time_trip_started, time_trip_ended));
+
+-- After viualizlation in R, removed trips over 10 hours
+
+delete from full_year
+ where trip_duration_minutes >= 600;
+```
+
+``` sql
+-- Added column that displays the day of the week
+
+Alter TABLE full_year
+Add weekday TEXT;
+Update full_year
+set weekday = (date_format(time_trip_started, '%W'));
+
+-- Added column that displays the month 
+
+ALTER TABLE full_year
+Add month Text;
+Update full_year
+set month = (date_format(time_trip_started, '%M'));
+
+-- Added column that displays the time of day 
+
+ALTER TABLE full_year
+Add time_of_day Text;
+Update full_year
+set time_of_day = (date_format(time_trip_started, '%l'  '%p' ));
+```
+
+# Filtering the Dataset
+
+------------------------------------------------------------------------
+
+Creating a new dataset containing only the bike trip location data.
+
+``` sql
+-- Created new tables group by the  start and end bike trip location
+
+Create table orgin as
+SELECT bike_station_start,  start_lng, start_lat
+FROM cyclistic.full_year;
+
+Create table destination as
+SELECT bike_station_end, end_lng, end_lat  
+FROM cyclistic.full_year;
+
+-- Combined into one table of distinct bike trip locations
+
+Create table locations (
+ bike_station_combine Text,
+ combine_lng Text,
+ combine_lat Text);
+
+Insert Into locations
+Select * from orgin
+Union All 
+Select * from destination;
+
+create table locations1 as
+Select bike_station_combine, count(bike_station_combine) as count, combine_lng, combine_lat  
+FROM locations
+group by bike_station_combine;
+
+-- Inspect new dataset for any errors
+Select bike_station_combine, count, combine_lng, combine_lat  
+ FROM locations1
+ group by bike_station_combine;  
+```
+
+# Exported Cleaned Data
+
+------------------------------------------------------------------------
+
+Exported cleaned data into a new file for final analysis in R Studio.
+
+``` sql
+SELECT * FROM full_year INTO OUTFILE 'C:/Users/HP/Documents/R/cyclistic.cleaned.data.csv'
+FIELDS TERMINATED BY ','  
+ENCLOSED BY '"'
+ESCAPED BY '\\'
+LINES TERMINATED BY '\n';
+
+SELECT * FROM locations1 INTO OUTFILE 'C:/Users/HP/Documents/R/locations1.csv'
+FIELDS TERMINATED BY ','  
+ENCLOSED BY '"'
+ESCAPED BY '\\'
+LINES TERMINATED BY '\n';
+```
+<div class="tocify-extend-page" data-unique="tocify-extend-page" style="height: 0;"></div>

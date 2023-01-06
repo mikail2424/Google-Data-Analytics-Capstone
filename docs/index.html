@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Google Analytics Capstone Project - Cyclisitic Case Study</title>
+
+<script src="site_libs/header-attrs-2.18/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/journal.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Google Analytics Capstone Project - Cyclisitic Case Study</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="Links.html">Data Cleaning SQL Script</a>
+</li>
+<li>
+  <a href="Cyclistic.Analysis.html">Cyclistic Analysis</a>
+</li>
+<li>
+  <a href="Final.Report.html">Final Report</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Google Analytics Capstone Project -
+Cyclisitic Case Study</h1>
+
+</div>
+
+
+<div
+id="this-case-study-was-completed-as-part-of-the-google-data-analytics-professional-certificate."
+class="section level4">
+<h4><em>This Case Study was completed as part of the Google Data
+Analytics Professional Certificate.</em></h4>
+<p>___________________________________________________________________________________</p>
+</div>
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<hr />
+<p>You are a junior data analyst working in the marketing analyst team
+at Cyclistic, a bike-share company in Chicago; whose bike-share program
+has grown to a fleet of 5,824 bicycles that are geotracked and locked
+into a network of 692 stations across Chicago. The bikes can be unlocked
+from one station and returned to any other station in the system
+anytime. The director of marketing believes the company’s future success
+depends on maximizing the number of annual memberships. Therefore, your
+team wants to understand how casual riders and annual members use
+Cyclistic bikes differently. From these insights, your team will design
+a new marketing strategy to convert casual riders into annual members.
+But first, Cyclist executives must approve your recommendations, so they
+must be backed up with compelling data insights and professional data
+visualizations.</p>
+</div>
+<div id="business-task" class="section level2">
+<h2>Business Task</h2>
+<hr />
+<p>Until now, Cyclistic’s marketing strategy relied on building general
+awareness and appealing to broad consumer segments. One approach that
+helped make these things possible was the flexibility of its pricing
+plans: single-ride passes, full-day passes, and annual memberships.
+Customers who purchase single-ride or full-day passes are referred to as
+casual riders. Customers who purchase annual memberships are Cyclistic
+members. Cyclistic’s finance analysts have concluded that annual members
+are much more profitable than casual riders. Although the pricing
+flexibility helps Cyclistic attract more customers, Moreno believes that
+maximizing the number of annual members will be key to future growth.
+Rather than creating a marketing campaign that targets all-new
+customers, Moreno believes there is a very good chance to convert casual
+riders into members. Moreno has set a clear goal: Design marketing
+strategies aimed at converting casual riders into annual members. In
+order to do that, however, the marketing analyst team needs to better
+understand how annual members and casual riders differ. Moreno and her
+team are interested in analyzing the Cyclistic historical bike trip data
+to identify trends.</p>
+<p><br />
+</p>
+</div>
+<div id="objective-ask-phase" class="section level1">
+<h1>1. Objective (Ask Phase)</h1>
+<hr />
+<p>The objective of this business task is to analyze how Cyclistic’s
+annual members and casual riders differ in order to design marketing
+strategies targeted at maximizing the share of annual members; with an
+emphasis on converting current casual riders to annual members.</p>
+</div>
+<div id="prepare-phase" class="section level1">
+<h1>2. Prepare Phase</h1>
+<hr />
+<p>In order to do my analysis I complied twelve consecutive months (July
+2021- June 2022) of Cyclistic’s bike-share rider data. The data is
+provided by Divvy Bike Company, and can be found at: <a
+href="https://ride.divvybikes.com/system-data"
+class="uri">https://ride.divvybikes.com/system-data</a> The data is
+public and made available by Motivate International Inc. under this <a
+href="https://ride.divvybikes.com/data-license-agreement">license</a>.
+Finally to protect the safety and privacy of the riders, riders’
+personally identifiable information has been removed from the
+dataset.</p>
+</div>
+<div id="process-phase" class="section level1">
+<h1>3. Process Phase</h1>
+<hr />
+<p>In order to prepare the data for analysis the year’s worth of
+ride-share data was processed and cleaned using the SQL Script on MySQL.
+To begin the ride-share data was imported into tables, with thirteen
+original columns listed in the SQL script.</p>
+<pre class="sql"><code>Create table july_21 (
+   ride_id Text,
+   rideable_type Text,
+   time_trip_started Timestamp,   
+   time_trip_ended Timestamp,
+   bike_station_start Text,
+   start_station_id Text,
+   bike_station_end Text,
+   end_station_id Text,
+   start_lat Real,
+   start_lng Real,  
+   end_lat Real,
+   end_lng Real,
+   customer_type Text);</code></pre>
+<p>After inspection, any anomalies or errors were removed and the
+individual tables were combined into a single table, collating the
+entire year’s worth of rider data. Next I identified the outliers for
+trip duration for my data, and removed these observations from my data.
+Then I identified bike station locations that were NULL, empty, test, or
+a maintenance station to remove these trips from my data as well.</p>
+<pre class="sql"><code>Select timestampdiff(minute, time_trip_started, time_trip_ended), time_trip_started, time_trip_ended, bike_station_start, bike_station_end 
+ from full_year
+ where (timestampdiff(minute, time_trip_started, time_trip_ended) &lt;= 3 
+ and bike_station_start = bike_station_end)
+ and not bike_station_start = &#39;&#39;
+ or timestampdiff(minute, time_trip_started, time_trip_ended)  &lt;= 1
+ order by timestampdiff(minute, time_trip_started, time_trip_ended);
+ 
+delete from full_year
+ where bike_station_start = &#39;351&#39;
+ or bike_station_start = &#39;DIVVY CASSETTE REPAIR MOBILE STATION&#39;
+ or bike_station_start = &#39;WEST CHI-WATSON&#39;
+ or bike_station_start = &#39;Base - 2132 W Hubbard Warehouse&#39;
+ or bike_station_start = &#39;Base - 2132 W Hubbard&#39;
+ or bike_station_start = &#39;Pawel Bialowas - Test- PBSC charging station&#39;
+ or start_station_id like &#39;%DIVVY%&#39;;</code></pre>
+<p>Afterwards a new column for trip duration, month, time of day, and
+year were created, and these new columns were added these to to my
+dataset to bolster my later analysis.</p>
+<pre class="sql"><code>ALTER TABLE full_year
+ Add month Text;
+ Update full_year
+ set month = (date_format(time_trip_started, &#39;%M&#39;))</code></pre>
+<p>With this done I created two new tables containing the location data
+from the dataset by partitioning the dataset by start and end
+destination. Afterwards I combined these two tables in one representing
+all unique bike station locations and an count of the frequency of each
+bike station usage.</p>
+<pre class="sql"><code>locations1 as 
+ Select bike_station_combine, count(bike_station_combine) as count, combine_lng, combine_lat  
+ FROM locations
+ group by bike_station_combine;</code></pre>
+<p>Finally after a final inspection of the whole dataset, the cleaned
+dataset was exported into a csv file for final analysis and
+visualization. An complete and detailed explanation of the cleaning
+process can be found in my SQL script <a href="Links.html">here</a>.</p>
+</div>
+<div id="analyze-share-phase" class="section level1">
+<h1>4 &amp; 5. Analyze &amp; Share Phase</h1>
+<hr />
+<p>My analysis and visualizations were done in the R statistical
+programming language using RStudio. For the analysis I began by
+importing the csv file exported by my SQL script into Rstudio. I
+finished my analysis by visualizing Cyclistic’s bike station locations,
+and then the most popular and least popular bike stations were complied,
+and mapped as well.</p>
+<p><u>The full analysis and visualizations can be found in my final
+analysis <a href="Cyclistic.Analysis.html">here</a>.</u></p>
+<p>Finally I derived three recommendations for Cyclistic marketing
+analyst team from my analysis on the Cyclistic bike-share program, and
+the three marketing recommendations for the marketing analyst team can
+be found outlined below:</p>
+<ol style="list-style-type: decimal">
+<li><strong><em>A Digital Ad Campaign highlighting the Tourist
+Attractions in Chicago’s Metro Hub and Coast</em></strong></li>
+</ol>
+<p>The final analysis of Cyclistic’s bike stations locations displayed
+that riders’ most popular bike stations were stationed near Chicago’s
+metro hub and coast, validating prior knowledge that most riders use the
+bike-share program for leisure. Moreover deeper analysis into causal
+riders supported this analysis as well, as analysis showed that causal
+riders preferred to ride on the weekend and after regular work hours
+suggesting casual riders were riding for fun rather than for commuting
+to work. Therefore, the Cyclistic marketing team should capitalized on
+this by running an digital ad campaign targeted towards causal riders
+that both highlights the major tourist attractions in metro Chicago and
+scenic coastline, and promotes the use of Cyclistic’s bikes. Finally
+this could be accomplished by combining promotional ads that display
+Cyclistic’s customers enjoying their time on bikes at major metro
+Chicago spots, and by creating a series of suggested tailored scenic
+bike routes through metro Chicago that encourage riders to try the
+different bike routes over a extended period of time. Thus, encouraging
+casual riders to switch to the annual membership in order to save on the
+multiple scenic bike rides.</p>
+<ol start="2" style="list-style-type: decimal">
+<li><strong><em>A Digital Marketing Campaign highlighting a Discount on
+Electric Bikes for Annual Members</em></strong></li>
+</ol>
+<p>Furthermore, while most riders use the bike-share program for
+leisure, analysis showed that causal riders overtake annual members
+during the late night hours of 10PM till 5AM, suggesting that these
+later riders were using the bike for commuting and travel. Additionally,
+across all time casual riders take bike trips that are significantly
+longer than annual members, therefore I recommend a targeted marketing
+campaign promoting a discount on electric bikes for annual members, that
+would run digital ads at bike stations at night. Thus, casual riders
+would be incentivize to convert to annual memberships to attain the
+benefits of shorter trips times and no longer needing to cycling from
+using electric bikes, which would be especially beneficial to this
+section of casual riders traveling or commuting at night after a long
+tiring day.</p>
+<ol start="3" style="list-style-type: decimal">
+<li><strong><em>Offer Discounted Cyclistic Annual Memberships during the
+Summer</em></strong></li>
+</ol>
+<p>Finally the Cyclistic analyst marketing team should take advantage of
+the significant increase in causal riders during the summer season by
+offering an promotional discount that lowers the price of the annual
+membership during the month of July, August, and September. Furthermore
+as a result of Chicago’s clement weather during this time, Cyclistic can
+also capitalize on the increase in ridership and good weather by
+partnering the discount with ads highlighting serene bike rides in the
+pleasant weather.</p>
+<u>The full final report can be <a
+href="Final.Report.html">here</a>.</u>
+<div class="tocify-extend-page" data-unique="tocify-extend-page"
+style="height: 0;">
+
+</div>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

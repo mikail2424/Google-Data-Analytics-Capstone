@@ -1,0 +1,18 @@
+name: "Google Analytics Cyclisitic Case Study"
+navbar:
+  title: "Google Analytics Capstone Project - Cyclisitic Case Study"
+  left:
+    - text: "Home"
+      href: index.html
+    - text: "Data Cleaning SQL Script"
+      href: Links.html 
+    - text: "Cyclistic Analysis"
+      href: Cyclistic.Analysis.html
+    - text: "Final Report"
+      href: Final.Report.html
+output_dir: "docs"
+output: 
+  html_document:  
+    self_contained: no  
+    theme: journal
+    css: style.css 

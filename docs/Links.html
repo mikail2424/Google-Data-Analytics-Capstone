@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Data Cleaning SQL Script</title>
+
+<script src="site_libs/header-attrs-2.18/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/journal.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet" />
+<script src="site_libs/pagedtable-1.1/js/pagedtable.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Google Analytics Capstone Project - Cyclisitic Case Study</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="Links.html">Data Cleaning SQL Script</a>
+</li>
+<li>
+  <a href="Cyclistic.Analysis.html">Cyclistic Analysis</a>
+</li>
+<li>
+  <a href="Final.Report.html">Final Report</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Data Cleaning SQL Script</h1>
+
+</div>
+
+
+<p>___________________________________________________________________________________</p>
+<p>To complete the Capstone Project of the Google Data Analytics
+Professional Certificate I did analysis on the Cyclistic bike-share
+company, using the data provided from Divvy Bikes (<a
+href="https://divvy-tripdata.s3.amazonaws.com/index.html"
+class="uri">https://divvy-tripdata.s3.amazonaws.com/index.html</a>). To
+begin my analysis I performed most of of my data exploration, cleaning,
+and processing using SQL in the MySQL database management system.
+Afterwards I performed my final analysis using R, and created my data
+visualizations in R. The SQL script begins begins below.
+___________________________________________________________________________________</p>
+<div id="importing-data" class="section level1">
+<h1>Importing Data</h1>
+<hr />
+<p>First a new database was created to work in; then tables were created
+for each month, and finally the Cyclistic data contained in the csv
+files were imported into these new tables.</p>
+<pre class="sql"><code> Create table july_211 (
+   ride_id Text,
+   rideable_type Text,
+   time_trip_started Timestamp,   
+   time_trip_ended Timestamp,
+   bike_station_start Text,
+   start_station_id Text,
+   bike_station_end Text,
+   end_station_id Text,
+   start_lat Real,
+   start_lng Real,  
+   end_lat Real,
+   end_lng Real,
+   customer_type Text);
+Create table june_22 (
+   ride_id Text,
+   rideable_type Text,
+   time_trip_started Timestamp,   
+   time_trip_ended Timestamp,
+   bike_station_start Text,
+   start_station_id Text,
+   bike_station_end Text,
+   end_station_id Text,
+   start_lat Real,
+   start_lng Real,  
+   end_lat Real,
+   end_lng Real,
+   customer_type Text);
+ Create table may_22 (
+   ride_id Text,
+   rideable_type Text,
+   time_trip_started Timestamp,   
+   time_trip_ended Timestamp,
+   bike_station_start Text,
+   start_station_id Text,
+   bike_station_end Text,
+   end_station_id Text,
+   start_lat Real,
+   start_lng Real,  
+   end_lat Real,
+   end_lng Real,
+   customer_type Text);
+Create table april_22 (
+   ride_id Text,
+   rideable_type Text,
+   time_trip_started Timestamp,   
+   time_trip_ended Timestamp,
+   bike_station_start Text,
+   start_station_id Text,
+   bike_station_end Text,
+   end_station_id Text,
+   start_lat Real,
+   start_lng Real,  
+   end_lat Real,
+   end_lng Real,
+   customer_type Text);
+Create table march_22 (
+   ride_id Text,
+   rideable_type Text,
+   time_trip_started Timestamp,   
+   time_trip_ended Timestamp,
+   bike_station_start Text,
+   start_station_id Text,
+   bike_station_end Text,
+   end_station_id Text,
+   start_lat Real,
+   start_lng Real,  
+   end_lat Real,
+   end_lng Real,
+   customer_type Text);
+Create table feb_22 (
+   ride_id Text,
+   rideable_type Text,
+   time_trip_started Timestamp,   
+   time_trip_ended Timestamp,
+   bike_station_start Text,
+   start_station_id Text,
+   bike_station_end Text,
+   end_station_id Text,
+   start_lat Real,
+   start_lng Real,  
+   end_lat Real,
+   end_lng Real,
+   customer_type Text);
+Create table jan_22 (
+   ride_id Text,
+   rideable_type Text,
+   time_trip_started Timestamp,   
+   time_trip_ended Timestamp,
+   bike_station_start Text,
+   start_station_id Text,
+   bike_station_end Text,
+   end_station_id Text,
+   start_lat Real,
+   start_lng Real,  
+   end_lat Real,
+   end_lng Real,
+   customer_type Text);
+Create table dec_21 (   
+   ride_id Text,
+   rideable_type Text,
+   time_trip_started Timestamp,   
+   time_trip_ended Timestamp,
+   bike_station_start Text,
+   start_station_id Text,
+   bike_station_end Text,
+   end_station_id Text,
+   start_lat Real,
+   start_lng Real,  
+   end_lat Real,
+   end_lng Real,
+   customer_type Text);
+Create table nov_21 (
+   ride_id Text,
+   rideable_type Text,
+   time_trip_started Timestamp,   
+   time_trip_ended Timestamp,
+   bike_station_start Text,
+   start_station_id Text,
+   bike_station_end Text,
+   end_station_id Text,
+   start_lat Real,
+   start_lng Real,  
+   end_lat Real,
+   end_lng Real,
+   customer_type Text);
+Create table  oct_21 (
+   ride_id Text,
+   rideable_type Text,
+   time_trip_started Timestamp,   
+   time_trip_ended Timestamp,
+   bike_station_start Text,
+   start_station_id Text,
+   bike_station_end Text,
+   end_station_id Text,
+   start_lat Real,
+   start_lng Real,  
+   end_lat Real,
+   end_lng Real,
+   customer_type Text);
+Create table sept_21 (
+   ride_id Text,
+   rideable_type Text,
+   time_trip_started Timestamp,   
+   time_trip_ended Timestamp,
+   bike_station_start Text,
+   start_station_id Text,
+   bike_station_end Text,
+   end_station_id Text,
+   start_lat Real,
+   start_lng Real,  
+   end_lat Real,
+   end_lng Real,
+   customer_type Text);
+Create table  aug_21 (
+   ride_id Text,
+   rideable_type Text,
+   time_trip_started Timestamp,   
+   time_trip_ended Timestamp,
+   bike_station_start Text,
+   start_station_id Text,
+   bike_station_end Text,
+   end_station_id Text,
+   start_lat Real,
+   start_lng Real,  
+   end_lat Real,
+   end_lng Real,
+   customer_type Text);
+Create table july_21 (
+   ride_id Text,
+   rideable_type Text,
+   time_trip_started Timestamp,   
+   time_trip_ended Timestamp,
+   bike_station_start Text,
+   start_station_id Text,
+   bike_station_end Text,
+   end_station_id Text,
+   start_lat Real,
+   start_lng Real,  
+   end_lat Real,
+   end_lng Real,
+   customer_type Text);</code></pre>
+<p>Combined all the tables into one table representing the full year
+timespan between July 2021 to July 2022, and then inserted the year’s
+worth of data into this new table.</p>
+<pre class="sql"><code>Create table full_year (
+   ride_id Text,
+   rideable_type Text,
+   time_trip_started Timestamp,   
+   time_trip_ended Timestamp,
+   bike_station_start Text,
+   start_station_id Text,
+   bike_station_end Text,
+   end_station_id Text,
+   start_lat Real,
+   start_lng Real,  
+   end_lat Real,
+   end_lng Real,
+   customer_type Text);
+   
+Insert Into full_year
+Select * from july_211
+Union All 
+Select * from aug_21
+Union All
+Select * from sept_21
+Union All
+Select * from oct_21
+Union All 
+Select * from nov_21
+Union All 
+Select * from dec_21
+Union All
+Select * from jan_22
+Union All
+Select * from feb_22
+Union All
+Select * from march_22
+Union All
+Select * from april_22
+Union All
+Select * from may_22
+Union All 
+Select * from june_22;  </code></pre>
+</div>
+<div id="inspecting-data" class="section level1">
+<h1>Inspecting Data</h1>
+<hr />
+<p>Identifying irregularities, anomalies, and reporting errors.</p>
+<pre class="sql"><code>-- Inspecting data to find trips whose duration where less than or equal to one minute,and also trips whose duration were short and did not change  location.
+
+Select timestampdiff(minute, time_trip_started, time_trip_ended), time_trip_started, time_trip_ended 
+ from full_year
+ where (timestampdiff(minute, time_trip_started, time_trip_ended) &lt;= 3 
+ and time_trip_started = time_trip_ended)
+ or timestampdiff(minute, time_trip_started, time_trip_ended)  &lt;= 1
+ order by timestampdiff(minute, time_trip_started, time_trip_ended);
+
+-- Identfying trips where the bike used was classic and the bike station start or end was either NULL or missing.
+
+Select * from full_year 
+ where (rideable_type = &#39;classic_bike&#39; or rideable_type = &#39;docked_bike&#39;)
+ and  (bike_station_start IS NULL 
+ or bike_station_end IS NULL
+ or bike_station_start = &#39;&#39;
+ or bike_station_end = &#39;&#39;);
+
+-- Examined bike stations to find potential 
+
+Select distinct(bike_station_start)
+ from full_year;
+
+-- Further inspection of stations that potentialy need to be removed
+
+Select *
+ from full_year
+ where bike_station_start = &#39;&#39;;
+Select *
+ from full_year
+ where start_station_id like &#39;%DIVVY%&#39;; 
+  
+-- Identifying trips whose duration was outside the norm
+
+Select avg(trip_duration_minutes), max(trip_duration_minutes), min(trip_duration_minutes)
+ from full_year;
+
+Select count(trip_duration_minutes), trip_duration_minutes
+ from full_year
+ group by (trip_duration_minutes);</code></pre>
+<p><em>Moved data into R to further visualize the trips’ duration and
+identify potential outliers</em></p>
+</div>
+<div id="cleaning-and-altering-the-dataset" class="section level1">
+<h1>Cleaning and Altering the Dataset</h1>
+<hr />
+<p>Removing the trips identified above from the dataset that contained
+anomalies.</p>
+<pre class="sql"><code>delete from full_year
+ where (timestampdiff(minute, time_trip_started, time_trip_ended) &lt;= 3 
+ and bike_station_start = bike_station_end)
+ or timestampdiff(minute, time_trip_started, time_trip_ended)  &lt;= 1
+ order by timestampdiff(minute, time_trip_started, time_trip_ended);
+
+delete from full_year 
+ where (rideable_type = &#39;classic_bike&#39; or rideable_type = &#39;docked_bike&#39;)
+ and  (bike_station_start IS NULL 
+ or bike_station_end IS NULL
+ or bike_station_start = &#39;&#39;
+ or bike_station_end = &#39;&#39;);
+ 
+delete from full_year
+ where bike_station_start = &#39;351&#39;
+ or bike_station_start = &#39;DIVVY CASSETTE REPAIR MOBILE STATION&#39;
+ or bike_station_start = &#39;WEST CHI-WATSON&#39;
+ or bike_station_start = &#39;Base - 2132 W Hubbard Warehouse&#39;
+ or bike_station_start = &#39;Base - 2132 W Hubbard&#39;
+ or bike_station_start = &#39;Pawel Bialowas - Test- PBSC charging station&#39;
+ or start_station_id like &#39;%DIVVY%&#39;;</code></pre>
+<p>Adding new columns to the dataset for later analysis.</p>
+<hr />
+<pre class="sql"><code>-- Added column that displays the duration of the trips
+
+ALTER TABLE full_year
+ADD trip_duration_minutes BIGINT;
+Update full_year 
+set trip_duration_minutes = (timestampdiff(minute, time_trip_started, time_trip_ended));
+
+-- After viualizlation in R, removed trips over 10 hours
+
+delete from full_year
+ where trip_duration_minutes &gt;= 600;</code></pre>
+<pre class="sql"><code>-- Added column that displays the day of the week
+
+Alter TABLE full_year
+Add weekday TEXT;
+Update full_year
+set weekday = (date_format(time_trip_started, &#39;%W&#39;));
+
+-- Added column that displays the month 
+
+ALTER TABLE full_year
+Add month Text;
+Update full_year
+set month = (date_format(time_trip_started, &#39;%M&#39;));
+
+-- Added column that displays the time of day 
+
+ALTER TABLE full_year
+Add time_of_day Text;
+Update full_year
+set time_of_day = (date_format(time_trip_started, &#39;%l&#39;  &#39;%p&#39; ));</code></pre>
+</div>
+<div id="filtering-the-dataset" class="section level1">
+<h1>Filtering the Dataset</h1>
+<hr />
+<p>Creating a new dataset containing only the bike trip location
+data.</p>
+<pre class="sql"><code>-- Created new tables group by the  start and end bike trip location
+
+Create table orgin as
+SELECT bike_station_start,  start_lng, start_lat
+FROM cyclistic.full_year;
+
+Create table destination as
+SELECT bike_station_end, end_lng, end_lat  
+FROM cyclistic.full_year;
+
+-- Combined into one table of distinct bike trip locations
+
+Create table locations (
+ bike_station_combine Text,
+ combine_lng Text,
+ combine_lat Text);
+
+Insert Into locations
+Select * from orgin
+Union All 
+Select * from destination;
+
+create table locations1 as
+Select bike_station_combine, count(bike_station_combine) as count, combine_lng, combine_lat  
+FROM locations
+group by bike_station_combine;
+
+-- Inspect new dataset for any errors
+Select bike_station_combine, count, combine_lng, combine_lat  
+ FROM locations1
+ group by bike_station_combine;  </code></pre>
+</div>
+<div id="exported-cleaned-data" class="section level1">
+<h1>Exported Cleaned Data</h1>
+<hr />
+<p>Exported cleaned data into a new file for final analysis in R
+Studio.</p>
+<pre class="sql"><code>SELECT * FROM full_year INTO OUTFILE &#39;C:/Users/HP/Documents/R/cyclistic.cleaned.data.csv&#39;
+FIELDS TERMINATED BY &#39;,&#39;  
+ENCLOSED BY &#39;&quot;&#39;
+ESCAPED BY &#39;\\&#39;
+LINES TERMINATED BY &#39;\n&#39;;
+
+SELECT * FROM locations1 INTO OUTFILE &#39;C:/Users/HP/Documents/R/locations1.csv&#39;
+FIELDS TERMINATED BY &#39;,&#39;  
+ENCLOSED BY &#39;&quot;&#39;
+ESCAPED BY &#39;\\&#39;
+LINES TERMINATED BY &#39;\n&#39;;</code></pre>
+<div class="tocify-extend-page" data-unique="tocify-extend-page"
+style="height: 0;">
+
+</div>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

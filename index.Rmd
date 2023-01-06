@@ -1,0 +1,234 @@
+---
+title: "Google Analytics Capstone Project - Cyclisitic Case Study"
+output:
+  html_document:
+    toc: TRUE
+    toc_depth: 1
+    number_sections: false
+    toc_float: true
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+#### *This Case Study was completed as part of the Google Data Analytics Professional Certificate.*
+
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+## Introduction
+
+------------------------------------------------------------------------
+
+You are a junior data analyst working in the marketing analyst team at
+Cyclistic, a bike-share company in Chicago; whose bike-share program has
+grown to a fleet of 5,824 bicycles that are geotracked and locked into a
+network of 692 stations across Chicago. The bikes can be unlocked from
+one station and returned to any other station in the system anytime. The
+director of marketing believes the company's future success depends on
+maximizing the number of annual memberships. Therefore, your team wants
+to understand how casual riders and annual members use Cyclistic bikes
+differently. From these insights, your team will design a new marketing
+strategy to convert casual riders into annual members. But first,
+Cyclist executives must approve your recommendations, so they must be
+backed up with compelling data insights and professional data
+visualizations.
+
+## Business Task
+
+------------------------------------------------------------------------
+
+Until now, Cyclistic's marketing strategy relied on building general
+awareness and appealing to broad consumer segments. One approach that
+helped make these things possible was the flexibility of its pricing
+plans: single-ride passes, full-day passes, and annual memberships.
+Customers who purchase single-ride or full-day passes are referred to as
+casual riders. Customers who purchase annual memberships are Cyclistic
+members. Cyclistic's finance analysts have concluded that annual members
+are much more profitable than casual riders. Although the pricing
+flexibility helps Cyclistic attract more customers, Moreno believes that
+maximizing the number of annual members will be key to future growth.
+Rather than creating a marketing campaign that targets all-new
+customers, Moreno believes there is a very good chance to convert casual
+riders into members. Moreno has set a clear goal: Design marketing
+strategies aimed at converting casual riders into annual members. In
+order to do that, however, the marketing analyst team needs to better
+understand how annual members and casual riders differ. Moreno and her
+team are interested in analyzing the Cyclistic historical bike trip data
+to identify trends.
+
+\
+
+# 1. Objective (Ask Phase)
+
+------------------------------------------------------------------------
+
+The objective of this business task is to analyze how Cyclistic's annual
+members and casual riders differ in order to design marketing strategies
+targeted at maximizing the share of annual members; with an emphasis on
+converting current casual riders to annual members.
+
+# 2. Prepare Phase
+
+------------------------------------------------------------------------
+
+In order to do my analysis I complied twelve consecutive months (July
+2021- June 2022) of Cyclistic's bike-share rider data. The data is
+provided by Divvy Bike Company, and can be found at:
+<https://ride.divvybikes.com/system-data> The data is public and made
+available by Motivate International Inc. under this
+[license](https://ride.divvybikes.com/data-license-agreement). Finally
+to protect the safety and privacy of the riders, riders' personally
+identifiable information has been removed from the dataset.
+
+# 3. Process Phase
+
+------------------------------------------------------------------------
+
+In order to prepare the data for analysis the year's worth of ride-share
+data was processed and cleaned using the SQL Script on MySQL. To begin
+the ride-share data was imported into tables, with thirteen original
+columns listed in the SQL script.
+
+``` sql
+Create table july_21 (
+   ride_id Text,
+   rideable_type Text,
+   time_trip_started Timestamp,   
+   time_trip_ended Timestamp,
+   bike_station_start Text,
+   start_station_id Text,
+   bike_station_end Text,
+   end_station_id Text,
+   start_lat Real,
+   start_lng Real,  
+   end_lat Real,
+   end_lng Real,
+   customer_type Text);
+```
+
+After inspection, any anomalies or errors were removed and the
+individual tables were combined into a single table, collating the
+entire year's worth of rider data. Next I identified the outliers for
+trip duration for my data, and removed these observations from my data.
+Then I identified bike station locations that were NULL, empty, test, or
+a maintenance station to remove these trips from my data as well.
+
+``` sql
+Select timestampdiff(minute, time_trip_started, time_trip_ended), time_trip_started, time_trip_ended, bike_station_start, bike_station_end 
+ from full_year
+ where (timestampdiff(minute, time_trip_started, time_trip_ended) <= 3 
+ and bike_station_start = bike_station_end)
+ and not bike_station_start = ''
+ or timestampdiff(minute, time_trip_started, time_trip_ended)  <= 1
+ order by timestampdiff(minute, time_trip_started, time_trip_ended);
+ 
+delete from full_year
+ where bike_station_start = '351'
+ or bike_station_start = 'DIVVY CASSETTE REPAIR MOBILE STATION'
+ or bike_station_start = 'WEST CHI-WATSON'
+ or bike_station_start = 'Base - 2132 W Hubbard Warehouse'
+ or bike_station_start = 'Base - 2132 W Hubbard'
+ or bike_station_start = 'Pawel Bialowas - Test- PBSC charging station'
+ or start_station_id like '%DIVVY%';
+```
+
+Afterwards a new column for trip duration, month, time of day, and year
+were created, and these new columns were added these to to my dataset to
+bolster my later analysis.
+
+``` sql
+ALTER TABLE full_year
+ Add month Text;
+ Update full_year
+ set month = (date_format(time_trip_started, '%M'))
+```
+
+With this done I created two new tables containing the location data
+from the dataset by partitioning the dataset by start and end
+destination. Afterwards I combined these two tables in one representing
+all unique bike station locations and an count of the frequency of each
+bike station usage.
+
+``` sql
+locations1 as 
+ Select bike_station_combine, count(bike_station_combine) as count, combine_lng, combine_lat  
+ FROM locations
+ group by bike_station_combine;
+```
+
+Finally after a final inspection of the whole dataset, the cleaned
+dataset was exported into a csv file for final analysis and
+visualization. An complete and detailed explanation of the cleaning
+process can be found in my SQL script [here](Links.html).
+
+# 4 & 5. Analyze & Share Phase
+
+------------------------------------------------------------------------
+
+My analysis and visualizations were done in the R statistical
+programming language using RStudio. For the analysis I began by
+importing the csv file exported by my SQL script into Rstudio. I
+finished my analysis by visualizing Cyclistic's bike station locations,
+and then the most popular and least popular bike stations were complied,
+and mapped as well.
+
+[The full analysis and visualizations can be found in my final analysis
+[here](Cyclistic.Analysis.html).]{.underline}
+
+Finally I derived three recommendations for Cyclistic marketing analyst
+team from my analysis on the Cyclistic bike-share program, and the three
+marketing recommendations for the marketing analyst team can be found
+outlined below:
+
+1.  ***A Digital Ad Campaign highlighting the Tourist Attractions in
+    Chicago's Metro Hub and Coast***
+
+The final analysis of Cyclistic's bike stations locations displayed that
+riders' most popular bike stations were stationed near Chicago's metro
+hub and coast, validating prior knowledge that most riders use the
+bike-share program for leisure. Moreover deeper analysis into causal
+riders supported this analysis as well, as analysis showed that causal
+riders preferred to ride on the weekend and after regular work hours
+suggesting casual riders were riding for fun rather than for commuting
+to work. Therefore, the Cyclistic marketing team should capitalized on
+this by running an digital ad campaign targeted towards causal riders
+that both highlights the major tourist attractions in metro Chicago and
+scenic coastline, and promotes the use of Cyclistic's bikes. Finally
+this could be accomplished by combining promotional ads that display
+Cyclistic's customers enjoying their time on bikes at major metro
+Chicago spots, and by creating a series of suggested tailored scenic
+bike routes through metro Chicago that encourage riders to try the
+different bike routes over a extended period of time. Thus, encouraging
+casual riders to switch to the annual membership in order to save on the
+multiple scenic bike rides.
+
+2.  ***A Digital Marketing Campaign highlighting a Discount on Electric
+    Bikes for Annual Members***
+
+Furthermore, while most riders use the bike-share program for leisure,
+analysis showed that causal riders overtake annual members during the
+late night hours of 10PM till 5AM, suggesting that these later riders
+were using the bike for commuting and travel. Additionally, across all
+time casual riders take bike trips that are significantly longer than
+annual members, therefore I recommend a targeted marketing campaign
+promoting a discount on electric bikes for annual members, that would
+run digital ads at bike stations at night. Thus, casual riders would be
+incentivize to convert to annual memberships to attain the benefits of
+shorter trips times and no longer needing to cycling from using electric
+bikes, which would be especially beneficial to this section of casual
+riders traveling or commuting at night after a long tiring day.
+
+3.  ***Offer Discounted Cyclistic Annual Memberships during the
+    Summer***
+
+Finally the Cyclistic analyst marketing team should take advantage of
+the significant increase in causal riders during the summer season by
+offering an promotional discount that lowers the price of the annual
+membership during the month of July, August, and September. Furthermore
+as a result of Chicago's clement weather during this time, Cyclistic can
+also capitalize on the increase in ridership and good weather by
+partnering the discount with ads highlighting serene bike rides in the
+pleasant weather.
+
+[The full final report can be [here](Final.Report.html).]{.underline}
+<div class="tocify-extend-page" data-unique="tocify-extend-page" style="height: 0;"></div>

@@ -1,0 +1,372 @@
+---
+title: "Cyclistic Analysis"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    df_print: paged
+    number_sections: false
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+# Imported Data
+
+------------------------------------------------------------------------
+
+To begin my final analysis of the Cyclistic Bike-Share company data, I
+imported the data I cleaned and processed in MySQL into R to preform my
+analysis.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# Loaded in the libraries that I would be using in this analysis
+library(dplyr)
+library(ggplot2)
+library(tidyverse)
+library(plotly)
+library(leaflet) 
+library("viridis")
+library(readr)
+library(scales)
+```
+
+```{r}
+cyclistic.cleaned.data <- read.csv("cyclistic.cleaned.data.csv")
+locations <- read.csv("locations.csv")
+```
+
+```{r}
+# Renamed the columns in the data set to match the SQL script
+colnames(cyclistic.cleaned.data) <- c("ride_id", "rideable_type", "time_trip_started", "time_trip_ended", "bike_station_start", "start_station_id", "bike_station_end", "end_station_id", "start_lat", "start_lng", "end_lat", "end_lng", "customer_type", "trip_duration_minutes", "weekday", "month", "time_of_day")
+cyclistic.cleaned.data$customer_type <- gsub('[\n]','',cyclistic.cleaned.data$customer_type)
+```
+
+\
+
+# Summary Statistics
+
+------------------------------------------------------------------------
+
+I began my final analysis by examining the summary statistics for the
+whole Cyclistic data set to examine the breakdown in bike usage.
+
+```{r}
+(cyclistic.cleaned.data %>%
+   summarise(Ride.Count = n(), Average.Trip.Duration = mean(trip_duration_minutes), Classic.Bike.Count = sum(with(cyclistic.cleaned.data, rideable_type== "classic_bike")), Electric.Bike.Count = sum(with(cyclistic.cleaned.data, rideable_type== "electric_bike")), Docked.Bike.Count = sum(with(cyclistic.cleaned.data, rideable_type== "docked_bike"))))
+```
+
+\
+
+# Data Visualization
+
+------------------------------------------------------------------------
+
+I then partitioned my data set by customer type; separating annual
+members and causal riders, to begin to identify the difference in the
+bike-share usage.
+
+## [Member & Casual Analysis]{.underline}
+
+I first began to examine the split in customer type by displaying the
+split in customer type usage, and then visualized the difference in
+bike trips, time, and bike usage by customer type.
+
+```{r, fig.width = 10,fig.height = 6}
+(cyclistic.cleaned.data %>%
+  summarise(Casual= sum(with(cyclistic.cleaned.data, customer_type== "casual")), Member = sum(with(cyclistic.cleaned.data, customer_type== "member"))))
+
+# Graphing the split in bike usage and the average length of trips by customer type 
+cust <- ggplot(cyclistic.cleaned.data, aes(customer_type, fill = customer_type)) + geom_bar() + labs(x="Customer Type", y="Number of Rides",title="Number of Rides by Customer Type", fill='Customer Type') +  scale_y_continuous(labels = scales::comma) + scale_fill_viridis(discrete = TRUE, option = "F", end = .48) + scale_x_discrete(labels=c("casual" = "Casual", "member" = "Member"))
+(ggplotly(cust))
+
+avg_cust <- ggplot(cyclistic.cleaned.data, aes(x=customer_type, fill = customer_type)) + labs(x="Customer Type", y="Average Trip Duration",title="Average Trip Duration by Customer Type", fill='Customer Type')  +  scale_y_continuous(labels = scales::comma) + stat_summary(aes(y=trip_duration_minutes), fun = "mean", geom = "bar") +  scale_fill_viridis(discrete = TRUE, option = "B", end = .48) + scale_x_discrete(labels=c("casual" = "Casual", "member" = "Member"))
+(ggplotly(avg_cust))
+
+# Examining the split in ride type by customer plan, then plotting the observed split
+
+ride_plot <- ggplot(data=cyclistic.cleaned.data, aes(x=rideable_type, fill=customer_type)) + geom_bar(position="dodge", stat = "count") + labs(x="Bike Type", y="Number of Rides",title="Number of Rides for Bike Types by Customer Type", fill='Customer Type') +  scale_y_continuous(labels = scales::comma) +  scale_fill_viridis(discrete = TRUE, option = "B", end = .48) + scale_x_discrete(labels=c("classic_bike" = "Classic Bike", "docked_bike" = "Docked Bike", "electric_bike" = "Electric Bike"))
+(ggplotly(ride_plot))
+
+avg_ride <- ggplot(data=cyclistic.cleaned.data, aes(x=rideable_type, fill=customer_type))+ stat_summary(aes(y=trip_duration_minutes), fun = "mean", geom = "bar", position = position_dodge(0.9)) + labs(x="Bike Type", y="Average Trip Duration",title="Average Trip Duration for Bike Types by Customer Type", fill='Customer Type') +  scale_y_continuous(labels = scales::comma) +  scale_fill_viridis(discrete = TRUE, option = "B", end = .48) + scale_x_discrete(labels=c("classic_bike" = "Classic Bike", "docked_bike" = "Docked Bike", "electric_bike" = "Electric Bike"))
+(ggplotly(avg_ride))
+```
+
+After this I partitioned the data set by time of day, weekday,and month
+and visualized this data.
+
+## [Time of Day]{.underline}
+
+To inspect the differences by time of day, I examined the amount of
+trips and the average time duration for every hour.
+
+```{r, fig.width = 10,fig.height = 6 }
+# Count of Cyclistic's bike trips for each hour of the day.
+(time_mode <- cyclistic.cleaned.data %>%
+    summarise('12AM' = sum(with(cyclistic.cleaned.data, time_of_day== "12AM")), '1AM' = sum(with(cyclistic.cleaned.data, time_of_day== "1AM")),'2AM' = sum(with(cyclistic.cleaned.data, time_of_day== "2AM")), '3AM' = sum(with(cyclistic.cleaned.data, time_of_day== "3AM")),'4AM' = sum(with(cyclistic.cleaned.data, time_of_day== "4AM")),'5AM' = sum(with(cyclistic.cleaned.data, time_of_day== "5AM")), '6AM' = sum(with(cyclistic.cleaned.data, time_of_day== "6AM")), '7AM' = sum(with(cyclistic.cleaned.data, time_of_day== "7AM")), '8AM' = sum(with(cyclistic.cleaned.data, time_of_day== "8AM")), '9AM' = sum(with(cyclistic.cleaned.data, time_of_day== "9AM")),'10AM' = sum(with(cyclistic.cleaned.data, time_of_day== "10AM")),'11AM' = sum(with(cyclistic.cleaned.data, time_of_day== "11AM")), '12PM' = sum(with(cyclistic.cleaned.data, time_of_day== "12PM")), '1PM' = sum(with(cyclistic.cleaned.data, time_of_day== "1PM")),'2PM' = sum(with(cyclistic.cleaned.data, time_of_day== "2AM")), '3PM' = sum(with(cyclistic.cleaned.data, time_of_day== "3AM")),'4PM' = sum(with(cyclistic.cleaned.data, time_of_day== "4AM")),'5PM' = sum(with(cyclistic.cleaned.data, time_of_day== "5AM")),'6PM' = sum(with(cyclistic.cleaned.data, time_of_day== "6AM")),'7PM' = sum(with(cyclistic.cleaned.data, time_of_day== "7AM")),'8PM' = sum(with(cyclistic.cleaned.data, time_of_day== "8AM")),'9PM' = sum(with(cyclistic.cleaned.data, time_of_day== "9AM")),'10PM' = sum(with(cyclistic.cleaned.data, time_of_day== "10AM")),'11PM' = sum(with(cyclistic.cleaned.data, time_of_day== "11PM"))))
+
+name_time <- c('12AM', '1AM', '2AM', '3AM', '4AM', '5AM', '6AM', '7AM', '8AM', '9AM', '10AM', '11AM', '12PM', '1PM', '2PM', '3PM', '4PM', '5PM', '6PM', '7PM', '8PM', '9PM', '10PM', '11PM')
+cyclistic.cleaned.data$time_of_day <- factor(cyclistic.cleaned.data$time_of_day, levels = name_time)
+
+# Graphing of the count of bike trips for each hour of the day and the average bike trip duration for each hour of the day
+
+time <- ggplot(cyclistic.cleaned.data, aes(x = time_of_day, fill = time_of_day)) + geom_bar() + labs(x="Time of Day", y="Number of Rides",title = "Number of Rides by the Time of Day (AM/PM)", fill = 'Time of Day (AM/PM)') + scale_y_continuous(labels = scales::comma) + scale_fill_viridis(discrete = TRUE, option = "B") + theme(axis.text.x=element_text(angle=30, vjust=1, hjust=1))
+(ggplotly(time))
+
+avg_time <- ggplot(data=cyclistic.cleaned.data, aes(x=time_of_day, fill=time_of_day)) + labs(x="Time of Day (AM/PM)", y="Average Trip Duration\nin Minutes",title="Average Trip Duration by the Time of Day (AM/PM)", fill = 'Time of Day (AM/PM)') + stat_summary(aes(y =trip_duration_minutes), fun = "mean", geom = "bar", position = position_dodge(width = .9)) + scale_y_continuous(labels = scales::comma) + scale_fill_viridis(discrete = TRUE, option = "B") + theme(axis.text.x=element_text(angle=30, vjust=.8, hjust=0.8))
+(ggplotly(avg_time))
+```
+
+I then look into the difference in customer type by examining the amount
+of trips and the average time duration for every hour by customer type.
+
+```{r, fig.width = 10,fig.height = 6 }
+cust_time <- ggplot(cyclistic.cleaned.data, aes(x=time_of_day, fill=customer_type)) + geom_bar(position="dodge", stat = "count") + labs(x="Time of Day", y="Number of Rides", title="Number of Rides by Time of Day (AM/PM)\nby Customer Type", fill='Customer Type') + scale_y_continuous(labels = scales::comma) + scale_fill_viridis(discrete = TRUE, option = "F", end = .48) + theme(axis.text.x=element_text(angle=30, vjust=.8, hjust=0.8))
+(ggplotly(cust_time))
+
+avg_cust_time <- ggplot(data=cyclistic.cleaned.data, aes(x=time_of_day, fill=customer_type)) + labs(x="Time of Day", y="Average Trip Duration\nin Minutes",title="Average Trip Duration by Time of Day (AM/PM)\nby Customer Type", fill='Customer Type') + scale_y_continuous(labels = scales::comma) + stat_summary(aes(y =trip_duration_minutes ), fun = "mean", geom = "bar", position = position_dodge(width = .9)) + scale_fill_viridis(discrete = TRUE, option = "F", end = .48) + theme(axis.text.x=element_text(angle=30, vjust=.8, hjust=0.8))
+(ggplotly(avg_cust_time))
+```
+
+## [Week]{.underline}
+
+Next I inspected the differences in rider usage by examining the amount
+of trips and the average time duration for every weekday.
+
+```{r, fig.width = 10, fig.height = 6}
+# Count of Cyclistic's  bike trips for each day of the week.
+(weekday_mode <- cyclistic.cleaned.data %>%
+    summarise(Monday = sum(with(cyclistic.cleaned.data, weekday== "Monday")), Tuesday = sum(with(cyclistic.cleaned.data, weekday== "Tuesday")), Wednesday = sum(with(cyclistic.cleaned.data, weekday== "Wednesday")), Thursday = sum(with(cyclistic.cleaned.data, weekday== "Thursday")), Friday =  sum(with(cyclistic.cleaned.data, weekday== "Friday")), Saturday = sum(with(cyclistic.cleaned.data, weekday== "Saturday")), Sunday = sum(with(cyclistic.cleaned.data, weekday== "Sunday"))))
+
+name_week <- c('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday')
+cyclistic.cleaned.data$weekday <- factor(cyclistic.cleaned.data$weekday, levels = name_week)
+
+# Graphing of the count of bike trips for each day of the week and the average bike trip duration for each day of the week
+
+week <- ggplot(data=cyclistic.cleaned.data, aes(x=weekday, fill=weekday)) + geom_bar(position="dodge", stat = "count") + labs(x="Weekday", y="Number of Rides",title="Number of Rides by the Day of Week", fill = 'Weekday') + scale_y_continuous(labels = scales::comma) + scale_fill_viridis(discrete = TRUE, option = "B")
+(ggplotly(week))
+
+avg_week <- ggplot(data=cyclistic.cleaned.data, aes(x=weekday, fill=weekday)) + labs(x="Weekday", y="Average Trip Duration\nin Minutes",title="Average Trip Duration by the Day of Week", fill = 'Weekday') + stat_summary(aes(y =trip_duration_minutes), fun = "mean", geom = "bar", position = position_dodge(width = .9)) + scale_y_continuous(labels = scales::comma) + scale_fill_viridis(discrete = TRUE, option = "B") 
+(ggplotly(avg_week))
+```
+
+I again looked into the differences in customer type by examining the
+amount of trips and the average trip duration for each weekday by
+customer type.
+
+```{r, fig.width = 10, fig.height = 6}
+cust_week <- ggplot(data=cyclistic.cleaned.data, aes(x=weekday, fill=customer_type)) + geom_bar(position="dodge", stat = "count") + labs(x="Weekday", y="Number of Rides",title="Number of Rides by Weekday\nby Customer Type", fill='Customer Type') + scale_y_continuous(labels = scales::comma) + scale_fill_viridis(discrete = TRUE, option = "B", end = .48) 
+ggplotly(cust_week)
+
+avg_cust_week <- ggplot(data=cyclistic.cleaned.data, aes(x=weekday, fill=customer_type)) + labs(x="Weekday", y="Average Trip Duration", title="Average Trip Duration by Weekday\nby Customer Type", fill='Customer Type') + stat_summary(aes(y =trip_duration_minutes ), fun = "mean", geom = "bar", position = position_dodge(width = .9)) + scale_y_continuous(labels = scales::comma) + scale_fill_viridis(discrete = TRUE, option = "B", end = .48) 
+ggplotly(avg_cust_week)
+```
+
+## [Month]{.underline}
+
+Lastly I inspected the differences in rider usage by month by examining
+the amount of trips and the average time duration for each month.
+
+```{r, fig.width = 10,fig.height = 6}
+# Count of Cyclistic's bike trips for each month
+(month_mode <- cyclistic.cleaned.data %>%
+summarise(January = sum(with(cyclistic.cleaned.data, month== "January")), February = sum(with(cyclistic.cleaned.data, month== "February")), March = sum(with(cyclistic.cleaned.data, month== "March")), April = sum(with(cyclistic.cleaned.data, month== "April")), May =  sum(with(cyclistic.cleaned.data, month== "May")), June = sum(with(cyclistic.cleaned.data, month== "June")), July = sum(with(cyclistic.cleaned.data, month== "July")), August = sum(with(cyclistic.cleaned.data, month== "August")), September = sum(with(cyclistic.cleaned.data, month== "September")), October = sum(with(cyclistic.cleaned.data, month== "October")), November = sum(with(cyclistic.cleaned.data, month== "November")), December = sum(with(cyclistic.cleaned.data, month== "December"))))
+
+name_month <- c("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
+cyclistic.cleaned.data$month <- factor(cyclistic.cleaned.data$month, levels = name_month)
+
+# Graphing of the count of bike trips for each Month and the bike trip duration for each Month.
+
+month <- ggplot(cyclistic.cleaned.data, aes(month, fill=month)) + geom_bar() + labs(x="Month", y="Number of Rides",title="Number of Rides by the Month", fill='Month') + scale_y_continuous(labels = scales::comma) + scale_fill_viridis(discrete = TRUE, option = "B") + theme(axis.text.x=element_text(angle=30, vjust=.8, hjust=0.8))
+(ggplotly(month))
+
+avg_month <- ggplot(data=cyclistic.cleaned.data, aes(x=month, fill=month)) + stat_summary(aes(y =trip_duration_minutes), fun = "mean", geom = "bar", position = position_dodge(width = .9)) + labs(x="Month", y="Average Trip Duration\nin Minutes",title="Average Trip Duration by the Month", fill='Month') + scale_y_continuous(labels = scales::comma) + scale_fill_viridis(discrete = TRUE, option = "B") + theme(axis.text.x=element_text(angle=30, vjust=.8, hjust=0.8))
+(ggplotly(avg_month))
+```
+
+I then looked into the differences in customer type by month examining
+the amount of trips and the average time duration for each month by
+customer type.
+
+```{r, fig.width = 10,fig.height = 6}
+cust_month <- ggplot(data=cyclistic.cleaned.data, aes(x=month, fill=customer_type)) + geom_bar(position="dodge", stat = "count") + labs(x="Month", y="Number of Rides",title="Number of Rides by Month\nby Customer Type", fill='Customer Type') + scale_y_continuous(labels = scales::comma) + scale_fill_viridis(discrete = TRUE, option = "F", end = .48) + theme(axis.text.x=element_text(angle=30, vjust=.8, hjust=0.8))
+(ggplotly(cust_month))
+
+avg_cust_month <- ggplot(data=cyclistic.cleaned.data, aes(x=month, fill=customer_type)) + labs(x="Month", y="Average Number of Rides",title="Average Trip Duration by Month\nby Customer Type", fill='Customer Type') + stat_summary(aes(y =trip_duration_minutes ), fun = "mean", geom = "bar", position = position_dodge(width = .9)) + scale_y_continuous(labels = scales::comma) + scale_fill_viridis(discrete = TRUE, option = "B", end = .48) + theme(axis.text.x=element_text(angle=30, vjust=.8, hjust=0.8))
+(ggplotly(avg_cust_month))
+```
+
+\
+
+# Popular/Unpopular Bike Stations
+
+------------------------------------------------------------------------
+
+Finally I examined Cyclistic's bike station locations, and found the
+most popular and least popular bike stations; then plotted the location
+of these stations onto a map of the city of Chicago.
+
+```{r, out.width="100%", warning = FALSE}
+# Renamed the columns in the data set to match the SQL script
+colnames(locations) <- c("bike_station_combine", "count", "combine_lng", "combine_lat")
+
+mybins <- seq(0, 80000, by = 20000)
+
+#Creating hover text for map 
+mytext <- paste(
+   "Bike Station Name: ", locations$bike_station_combine, "<br/>", 
+   "Count of Trips: ", locations$count, sep="") %>%
+  lapply(htmltools::HTML)
+
+#Creating of color palette for location data on map
+mypalette<- colorBin(palette="inferno", domain=locations$count, na.color="transparent", bins=mybins, reverse = TRUE)
+
+#Creation of map using leaflet package
+map <- leaflet(locations) %>% 
+  addTiles() %>%  
+  
+# Centering the map over the city of Chicago
+  setView(
+    lng = -87.66984677949904, lat = 41.89617798482842,  zoom = 11.5
+        ) %>%
+  addProviderTiles("CartoDB.Positron") %>%
+  
+# Plotting each bike station location on the map, and counting the usage of the the bike station
+  addCircleMarkers(
+    ~ combine_lng, ~ combine_lat, 
+    fillColor = ~ mypalette(count), 
+    fillOpacity = 0.7, 
+    color = "white", 
+    radius = 8, 
+    stroke = FALSE,
+# Adding in text to the map to identify the name of the bike station and its usage
+    label = mytext,
+    labelOptions = labelOptions(
+      style = list( 
+        "font-weight" = "normal", 
+        padding = "3px 8px"
+        ), 
+      textsize = "13px", 
+      direction = "auto"
+      ) 
+    ) %>%
+  addLegend( 
+    pal = mypalette, 
+    values = locations$count, 
+    opacity = 0.9,
+    title = "Count of Trips", 
+    position = "bottomright"
+    )
+map
+```
+
+## [Top Bike Stations]{.underline}
+
+Identifying and mapping the top ten percent of Cyclistic's bike station locations
+
+```{r, out.width="100%", warning = FALSE}
+# Created a new dataset containing Cyclistic's fifty most used bike station locations. 
+
+(locations_top <- locations %>%                
+  arrange(desc(count)) %>% 
+  group_by(bike_station_combine) %>%
+    rename("Bike.Station" = "bike_station_combine", "Count" = "count", "Longitude" = "combine_lng", "Latitude" = "combine_lat") %>%
+    head(120))
+
+mybins1 <- seq(30000, 80000, by = 10000)
+mypalette1<- colorBin( palette="inferno", domain=locations_top$Count, na.color="transparent", bins=mybins1, reverse = TRUE)
+
+mytext1 <- paste(
+   "Bike Station Name: ", locations_top$Bike.Station, "<br/>", 
+   "Count of Trips: ", locations_top$Count, sep="") %>%
+  lapply(htmltools::HTML)
+
+(map <- leaflet(locations_top, width = "100%") %>% 
+  addTiles() %>%  
+  setView(
+    lng = -87.63875, lat = 41.90419,  zoom = 11.5
+        ) %>% 
+  addProviderTiles("CartoDB.Positron") %>%
+  addCircleMarkers(
+   ~ Longitude, ~ Latitude,  
+    fillColor = ~ mypalette1(Count), 
+    fillOpacity = 0.7, 
+    color = "white", 
+    radius = 8, 
+    stroke = FALSE,
+    label = mytext1,
+    labelOptions = labelOptions(
+      style = list( 
+        "font-weight" = "normal", 
+        padding = "3px 8px"
+        ), 
+      textsize = "13px", 
+      direction = "auto"
+      ) 
+    ) %>%
+  addLegend( 
+    pal = mypalette1, 
+    values = locations_top$Count, 
+    opacity = 0.9,
+    title = "Count of Trips", 
+    position = "bottomright"
+    ))
+```
+
+## [Bottom Bike Stations]{.underline}
+
+Identifying and mapping the bottom ten percent of Cyclistic's bike station locations
+
+```{r, out.width="100%", warning = FALSE}
+# Created a new dataset containing Cyclistic's fifty least used bike station locations. 
+
+(locations_bot <- locations %>%                
+  arrange(count) %>% 
+  group_by(bike_station_combine) %>%
+  rename("Bike.Station" = "bike_station_combine", "Count" = "count", "Longitude" = "combine_lng", "Latitude" = "combine_lat") %>%
+  head(120))
+
+mybins2 <- seq(0, 5, by = 1)
+mypalette2<- colorBin(palette="inferno", domain=locations_bot$Count, na.color="transparent", bins=mybins2, reverse = FALSE)
+
+mytext2 <- paste(
+   "Bike Station Name: ", locations_bot$Bike.Station, "<br/>", 
+   "Count of Trips: ", locations_bot$Count, sep="") %>%
+  lapply(htmltools::HTML)
+
+(map <- leaflet(locations_bot) %>% 
+  addTiles() %>%  
+  setView(
+    lng = -87.75331, lat = 41.84328,  zoom = 11
+        ) %>% 
+  addProviderTiles("CartoDB.Positron") %>%
+  addCircleMarkers(
+   ~ Longitude, ~ Latitude,  
+    fillColor = ~ mypalette2(Count), 
+    fillOpacity = 0.7, 
+    color = "white", 
+    radius = 8, 
+    stroke = FALSE,
+    label = mytext2,
+    labelOptions = labelOptions(
+      style = list( 
+        "font-weight" = "normal", 
+        padding = "3px 8px"
+        ), 
+      textsize = "13px", 
+      direction = "auto"
+      ) 
+    ) %>%
+  addLegend( 
+    pal = mypalette2, 
+    values = locations_bot$Count, 
+    opacity = 0.9,
+    title = "Count of Trips", 
+    position = "bottomright"
+    ))
+```
+<div class="tocify-extend-page" data-unique="tocify-extend-page" style="height: 0;"></div>
